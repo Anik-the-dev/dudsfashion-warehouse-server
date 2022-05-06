@@ -31,8 +31,35 @@ async function run() {
             const query = {}
             const cursor = database.find(query)
             const usersdb = await cursor.toArray()
-            console.log(usersdb)
             res.send(usersdb)
+        })
+        
+        // get data by filtering Query..........
+        app.get('/myitem', async (req, res)=>{
+            const email = req.query.email
+            const query = {email:email}
+            const cursor = database.find(query)
+            const filter = await cursor.toArray()
+            res.send(filter)
+        })
+
+        // get data via params
+        app.get('/users/:id', async (req, res)=>{
+            const id = req.params.id
+            console.log("id",id)
+            const query = {_id: objectId(id)}
+            const cursor = database.find(query)
+            const usersdb = await cursor.toArray()
+            res.send(usersdb)
+        })
+
+
+        // post data to Mongo DB
+        app.post('/users', async(req,res)=>{
+            const product = req.body
+            const result = await database.insertOne(product)
+            console.log(`Product Added! ${result.insertedId}`)
+            res.send({ack: "successfully add product to Server"})
         })
 
     } finally {
@@ -43,5 +70,5 @@ async function run() {
 run().catch(console.dir);
 
 app.listen(port, () => {
-    console.log("Look mama, Anik Listening 4000")
+    console.log("Look mama, Anik Listening 5000")
 })
