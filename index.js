@@ -1,6 +1,6 @@
 const express = require('express')
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const objectId =  require('mongodb').ObjectId
+const objectId = require('mongodb').ObjectId
 
 
 var cors = require('cors')
@@ -18,36 +18,36 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 
 async function run() {
-    
-    
+
+
     try {
-        
+
         await client.connect();
         console.log(`Connection establish21`)
         const database = client.db('dudfashion').collection('inventoryItems-Dress');
 
         // get data from mongo db
-        app.get('/users', async (req, res)=>{
+        app.get('/users', async (req, res) => {
             const query = {}
             const cursor = database.find(query)
             const usersdb = await cursor.toArray()
             res.send(usersdb)
         })
-        
+
         // get data by filtering Query..........
-        app.get('/myitem', async (req, res)=>{
+        app.get('/myitem', async (req, res) => {
             const email = req.query.email
-            const query = {email:email}
+            const query = { email: email }
             const cursor = database.find(query)
             const filter = await cursor.toArray()
             res.send(filter)
         })
 
         // get data via params
-        app.get('/users/:id', async (req, res)=>{
+        app.get('/users/:id', async (req, res) => {
             const id = req.params.id
-            console.log("id",id)
-            const query = {_id: objectId(id)}
+            console.log("id", id)
+            const query = { _id: objectId(id) }
             const cursor = database.find(query)
             const usersdb = await cursor.toArray()
             res.send(usersdb)
@@ -55,12 +55,33 @@ async function run() {
 
 
         // post data to Mongo DB
-        app.post('/users', async(req,res)=>{
+        app.post('/users', async (req, res) => {
             const product = req.body
             const result = await database.insertOne(product)
             console.log(`Product Added! ${result.insertedId}`)
-            res.send({ack: "successfully add product to Server"})
+            res.send({ ack: "successfully add product to Server" })
         })
+
+        // Update the sold,quantity.......
+        app.put('/users/:id', async (req, res) => {
+            const id = req.params.id
+            const updatedUser = req.body
+            console.log(req.body)
+            const filter = { _id: objectId(id) }
+            const options = { upsert: true }
+            const updatedDoc = {
+                $set: {
+                    
+                    sold:updatedUser.delivered,
+                    quantity:updatedUser.n
+                }
+            }
+            const result = await database.updateOne(filter, updatedDoc, options)
+            res.send(result)
+
+        })
+
+
 
     } finally {
         // await client.close()
