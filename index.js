@@ -62,6 +62,15 @@ async function run() {
             res.send({ ack: "successfully add product to Server" })
         })
 
+        // delete
+           // delete a single User
+           app.delete('/users/:id', async (req, res)=>{
+            const id = req.params.id
+            const query = {_id: objectId(id)}
+            const result = await database.deleteOne(query)
+            res.send(result)
+        })
+
         // Update the sold,quantity.......
         app.put('/users/:id', async (req, res) => {
             const id = req.params.id
