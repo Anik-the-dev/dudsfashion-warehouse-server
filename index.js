@@ -1,4 +1,5 @@
 const express = require('express')
+var jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const objectId = require('mongodb').ObjectId
 
@@ -25,6 +26,14 @@ async function run() {
         await client.connect();
         console.log(`Connection establish21`)
         const database = client.db('dudfashion').collection('inventoryItems-Dress');
+
+        // Auth
+        app.post('/login', async (req, res) => {
+            const user = req.body
+            const accessToken = sign(user, process.env.ACCESS_TOKEN, { expiresIn: '1d' })
+            res.send({ accessToken })
+
+        })
 
         // get data from mongo db
         app.get('/users', async (req, res) => {
@@ -63,10 +72,10 @@ async function run() {
         })
 
         // delete
-           // delete a single User
-           app.delete('/users/:id', async (req, res)=>{
+        // delete a single User
+        app.delete('/users/:id', async (req, res) => {
             const id = req.params.id
-            const query = {_id: objectId(id)}
+            const query = { _id: objectId(id) }
             const result = await database.deleteOne(query)
             res.send(result)
         })
@@ -80,9 +89,9 @@ async function run() {
             const options = { upsert: true }
             const updatedDoc = {
                 $set: {
-                    
-                    sold:updatedUser.delivered,
-                    quantity:updatedUser.n
+
+                    sold: updatedUser.delivered,
+                    quantity: updatedUser.n
                 }
             }
             const result = await database.updateOne(filter, updatedDoc, options)
@@ -98,6 +107,10 @@ async function run() {
 
 }
 run().catch(console.dir);
+
+app.get('/', (req, res) => {
+    res.send("Running Duds Server!")
+})
 
 app.listen(port, () => {
     console.log("Look mama, Anik Listening 5000")
